@@ -1,0 +1,551 @@
+
+                        <!DOCTYPE html>
+                        <html lang="en">
+                        <head>
+                            <meta charset="UTF-8">
+                            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+							<style>
+								body {
+									background-color: white; /* Ensure the iframe has a white background */
+								}
+
+								
+							</style>
+                        </head>
+                        <body>
+                            <!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Принципы формирования территорий</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+    rel="stylesheet"
+  />
+
+  <style>
+    :root {
+      --green: #3cb46e;
+      --text: #182033;
+      --border: #dce5ed;
+      --panel-bg: #f3f5f7;
+      --hint: #68748b;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      min-height: 100%;
+      margin: 0;
+      background-color: #ffffff;
+    }
+
+    body {
+      padding: 0 24px;
+      font-family: "Inter", sans-serif;
+      color: var(--text);
+    }
+
+    .interactive-card {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 38px;
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      background: #ffffff;
+      box-shadow: 0 18px 36px rgba(24, 32, 51, 0.1);
+    }
+
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 12px;
+      margin: 0;
+    }
+
+    .step {
+      width: 100%;
+      min-height: 106px;
+      height: 106px;
+      padding: 16px 8px;
+      border: 0;
+      border-radius: 12px;
+      background: var(--green);
+      color: #ffffff;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      font: inherit;
+      transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+    }
+
+    .step:hover,
+    .step:focus-visible,
+    .step.active {
+      background: var(--green);
+      color: #ffffff;
+      transform: translateY(-3px);
+      box-shadow: 0 8px 18px rgba(60, 180, 110, 0.28);
+      outline: none;
+    }
+
+    .step-title {
+      margin: 0;
+      font-size: 18px;
+      line-height: 1.25;
+      font-weight: 700;
+      letter-spacing: -0.35px;
+    }
+
+    .tab-panel {
+      width: 100%;
+      max-width: 900px;
+      min-height: 250px;
+      margin: 24px auto 0;
+      padding: 32px;
+      border-radius: 16px;
+      background: var(--panel-bg);
+    }
+
+    .tab-panel.is-empty {
+      display: flex;
+      align-items: flex-start;
+    }
+
+    .tab-panel-hint {
+      margin: 0;
+      color: var(--hint);
+      font-size: 18px;
+      font-style: italic;
+      line-height: 1.45;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+      animation: reveal 0.25s ease;
+    }
+
+    .tab-content p,
+    .tab-content li {
+      font-size: 18px;
+      line-height: 1.45;
+    }
+
+    .tab-content p {
+      margin: 0;
+    }
+
+    .tab-content p + p,
+    .tab-content ul {
+      margin-top: 16px;
+    }
+
+    .tab-content ul {
+      margin-bottom: 0;
+      padding-left: 24px;
+    }
+
+    .tab-content li + li {
+      margin-top: 8px;
+    }
+
+    .tab-content li {
+      color: var(--green);
+    }
+
+    .tab-content li span {
+      color: var(--text);
+    }
+
+    .course-message {
+      max-width: 1200px;
+      max-height: 0;
+      margin: 0 auto;
+      overflow: hidden;
+      opacity: 0;
+      transform: translateY(-8px);
+      transition:
+        max-height 0.35s ease,
+        margin-top 0.35s ease,
+        opacity 0.3s ease,
+        transform 0.3s ease;
+    }
+
+    .course-message.visible {
+      max-height: 900px;
+      margin-top: 48px;
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .course-message-content {
+      max-width: 850px;
+      margin: 0 auto;
+    }
+
+    .course-message p,
+    .course-message li {
+      font-size: 18px;
+      line-height: 1.45;
+    }
+
+    .course-message p {
+      margin: 0;
+    }
+
+    .course-message p + p,
+    .course-message ul {
+      margin-top: 16px;
+    }
+
+    .course-message ul {
+      margin-bottom: 24px;
+      padding-left: 24px;
+    }
+
+    .course-message li + li {
+      margin-top: 8px;
+    }
+
+    .course-message li {
+      color: var(--green);
+    }
+
+    .course-message li span {
+      color: var(--text);
+    }
+
+    @keyframes reveal {
+      from {
+        opacity: 0;
+        transform: translateY(6px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (max-width: 1100px) {
+      .interactive-card {
+        padding: 24px;
+      }
+
+      .steps {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 560px) {
+      body {
+        padding: 0 16px;
+      }
+
+      .interactive-card {
+        padding: 16px;
+      }
+
+      .steps {
+        grid-template-columns: 1fr;
+      }
+
+      .tab-panel {
+        min-height: 220px;
+        padding: 24px;
+      }
+
+      .tab-content p,
+      .tab-content li,
+      .course-message p,
+      .course-message li,
+      .tab-panel-hint {
+        font-size: 16px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="interactive-card">
+    <section
+      class="steps"
+      aria-label="Принципы формирования территорий"
+      role="tablist"
+    >
+      <button
+        class="step"
+        type="button"
+        role="tab"
+        aria-selected="false"
+        aria-controls="panel-1"
+        id="tab-1"
+      >
+        <h2 class="step-title">
+          Размер территории =
+          <br />
+          один человеко-день
+        </h2>
+      </button>
+
+      <button
+        class="step"
+        type="button"
+        role="tab"
+        aria-selected="false"
+        aria-controls="panel-2"
+        id="tab-2"
+      >
+        <h2 class="step-title">
+          Границы территории
+          <br />
+          по контурам местности
+        </h2>
+      </button>
+
+      <button
+        class="step"
+        type="button"
+        role="tab"
+        aria-selected="false"
+        aria-controls="panel-3"
+        id="tab-3"
+      >
+        <h2 class="step-title">
+          Территории не пересекаются
+          <br />
+          друг с другом
+        </h2>
+      </button>
+
+      <button
+        class="step"
+        type="button"
+        role="tab"
+        aria-selected="false"
+        aria-controls="panel-4"
+        id="tab-4"
+      >
+        <h2 class="step-title">
+          Территория не пересекает
+          <br />
+          сама себя
+        </h2>
+      </button>
+
+      <button
+        class="step"
+        type="button"
+        role="tab"
+        aria-selected="false"
+        aria-controls="panel-5"
+        id="tab-5"
+      >
+        <h2 class="step-title">
+          Отдельные
+          <br />
+          территории
+        </h2>
+      </button>
+    </section>
+
+    <section class="tab-panel is-empty" aria-live="polite">
+      <p class="tab-panel-hint">
+        Кликай на вкладки, чтобы узнать подробнее
+      </p>
+
+      <div
+        class="tab-content"
+        id="panel-1"
+        role="tabpanel"
+        aria-labelledby="tab-1"
+      >
+        <p>
+          Один человеко-день примерно равен шести часам, потому что из
+          стандартного восьмичасового рабочего дня вычитается время на дорогу
+          до территории. Рекомендуется создавать территории такого размера,
+          чтобы их можно было выверить за это время.
+        </p>
+
+        <p>
+          Также в документации могут встречаться термины «один рабочий день
+          выверки» и «один SP (story point)» — они означают то же самое, что и
+          человеко-день.
+        </p>
+      </div>
+
+      <div
+        class="tab-content"
+        id="panel-2"
+        role="tabpanel"
+        aria-labelledby="tab-2"
+      >
+        <p>
+          Территория должна быть замкнутой, ограниченной дорогами или другими
+          естественными границами (например, железнодорожными путями,
+          оврагами).
+        </p>
+      </div>
+
+      <div
+        class="tab-content"
+        id="panel-3"
+        role="tabpanel"
+        aria-labelledby="tab-3"
+      >
+        <p>
+          Территории не должны пересекаться между собой, чтобы избежать ошибок,
+          при которых одно здание может быть отнесено к двум территориям.
+        </p>
+      </div>
+
+      <div
+        class="tab-content"
+        id="panel-4"
+        role="tabpanel"
+        aria-labelledby="tab-4"
+      >
+        <p>
+          Территория не должна пересекать саму себя, иначе автоматический расчет
+          количества организаций будет невозможен.
+        </p>
+      </div>
+
+      <div
+        class="tab-content"
+        id="panel-5"
+        role="tabpanel"
+        aria-labelledby="tab-5"
+      >
+        <p>Выделяются:</p>
+
+        <ul>
+          <li>
+            <span>
+              для участков с частой сменой организаций, чтобы сосредоточить
+              выверку на ключевых местах;
+            </span>
+          </li>
+
+          <li>
+            <span>
+              для крупных торговых и бизнес-центров, особенно с поэтажными
+              планами.
+            </span>
+          </li>
+        </ul>
+      </div>
+    </section>
+  </main>
+
+  <section
+    class="course-message"
+    id="course-message"
+    aria-live="polite"
+    aria-hidden="true"
+  >
+    <div class="course-message-content">
+      <p>
+        <strong>
+          Иногда существующие территории могут не полностью соответствовать
+          описанным выше принципам. Например:
+        </strong>
+      </p>
+
+      <ul>
+        <li>
+          <span>
+            на выверку одной территории тратится слишком много времени (она
+            большая по площади или на ней много организаций);
+          </span>
+        </li>
+
+        <li>
+          <span>
+            появляются новые строения, которые не входят ни в одну из прежних
+            территорий, отчего остаются невыверенными;
+          </span>
+        </li>
+
+        <li>
+          <span>
+            граница территории пересекает здание, поэтому на такое здание
+            некорректно формируются задачи.
+          </span>
+        </li>
+      </ul>
+
+      <p>
+        <strong>
+          При необходимости ты можешь самостоятельно менять границы территорий.
+        </strong>
+      </p>
+    </div>
+  </section>
+
+  <script>
+    const steps = document.querySelectorAll(".step");
+    const panels = document.querySelectorAll(".tab-content");
+    const tabPanel = document.querySelector(".tab-panel");
+    const hint = document.querySelector(".tab-panel-hint");
+    const courseMessage = document.querySelector("#course-message");
+
+    const visitedTabs = new Set();
+    let courseMessageShown = false;
+
+    const openTab = (step) => {
+      const panelId = step.getAttribute("aria-controls");
+
+      steps.forEach((item) => {
+        const isCurrent = item === step;
+
+        item.classList.toggle("active", isCurrent);
+        item.setAttribute("aria-selected", String(isCurrent));
+      });
+
+      panels.forEach((panel) => {
+        panel.classList.toggle("active", panel.id === panelId);
+      });
+
+      hint.hidden = true;
+      tabPanel.classList.remove("is-empty");
+
+      visitedTabs.add(panelId);
+
+      if (visitedTabs.size === steps.length && !courseMessageShown) {
+        courseMessageShown = true;
+        courseMessage.classList.add("visible");
+        courseMessage.setAttribute("aria-hidden", "false");
+      }
+    };
+
+    steps.forEach((step) => {
+      step.addEventListener("click", () => openTab(step));
+    });
+  </script>
+</body>
+</html>
+
+							<script>
+                            	
+							</script>
+                        </body>
+                        </html>
+                    
