@@ -1,0 +1,790 @@
+
+                        <!DOCTYPE html>
+                        <html lang="en">
+                        <head>
+                            <meta charset="UTF-8">
+                            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+							<style>
+								body {
+									background-color: white; /* Ensure the iframe has a white background */
+								}
+
+								
+							</style>
+                        </head>
+                        <body>
+                            <!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Алгоритм заполнения таблицы</title>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+    :root {
+      --ink: #172033;
+      --muted: #596579;
+      --surface: #fff;
+      --background: #fff;
+      --panel: #f4f6f8;
+      --border: #d9e1ec;
+      --accent: #2fba7c;
+      --focus: #ff9e1b;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      min-height: 100%;
+      margin: 0;
+      background: var(--background);
+    }
+
+    body {
+      min-height: 100vh;
+      display: grid;
+      place-items: start center;
+      padding: 32px 20px;
+      color: var(--ink);
+      font-family: Inter, Arial, sans-serif;
+      font-size: 18px;
+    }
+
+    .interactive {
+      width: min(1080px, 100%);
+      padding: clamp(24px, 5vw, 48px);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      background: var(--surface);
+      box-shadow: 0 16px 36px rgba(23, 32, 51, 0.12);
+    }
+
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 108px;
+      padding: 16px 18px;
+      border: 2px solid var(--accent);
+      border-radius: 14px;
+      color: #fff;
+      background: var(--accent);
+      cursor: pointer;
+      font: 700 18px/1.3 Inter, Arial, sans-serif;
+      text-align: center;
+      transition:
+        box-shadow 0.2s ease,
+        transform 0.2s ease,
+        background 0.2s ease;
+    }
+
+    .step__number {
+      display: block;
+      font-size: 20px;
+      line-height: 1;
+    }
+
+    .step__label {
+      display: block;
+    }
+
+    .step:hover,
+    .step.is-active {
+      transform: translateY(-3px);
+      background: #27a970;
+      box-shadow: 0 8px 20px rgba(47, 186, 124, 0.3);
+    }
+
+    .step:focus-visible {
+      outline: 3px solid var(--focus);
+      outline-offset: 3px;
+    }
+
+    .panel {
+      min-height: 260px;
+      margin-top: 28px;
+      padding: clamp(22px, 4vw, 36px);
+      border-radius: 18px;
+      background: var(--panel);
+    }
+
+    .placeholder {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .content[hidden] {
+      display: none;
+    }
+
+    .content {
+      animation: appear 0.25s ease-out;
+    }
+
+    .content h2 {
+      margin: 0 0 16px;
+      font-size: 24px;
+      line-height: 1.25;
+    }
+
+    .content h2.section-heading {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 16px;
+      font-size: 18px;
+      white-space: nowrap;
+    }
+
+    .info-button {
+      display: inline-grid;
+      width: 24px;
+      height: 24px;
+      flex: 0 0 24px;
+      place-items: center;
+      padding: 0;
+      border: 0;
+      border-radius: 50%;
+      color: #fff;
+      background: var(--accent);
+      cursor: pointer;
+      font: 700 16px/1 Inter, Arial, sans-serif;
+    }
+
+    .info-button:hover {
+      background: #27a970;
+    }
+
+    .info-button:focus-visible {
+      outline: 3px solid var(--focus);
+      outline-offset: 3px;
+    }
+
+    .content p {
+      margin: 0;
+      line-height: 1.55;
+    }
+
+    .content p + p,
+    .content p + .table-wrap,
+    .content p + .note,
+    .content p + .link-line,
+    .content p + .next-step,
+    .note + p {
+      margin-top: 16px;
+    }
+
+    .link-line {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 48px;
+      padding: 10px 18px;
+      border: 2px solid var(--accent);
+      border-radius: 12px;
+      color: #fff;
+      background: var(--accent);
+      cursor: pointer;
+      font: 700 18px/1.3 Inter, Arial, sans-serif;
+      text-align: left;
+      text-decoration: none;
+      transition:
+        background 0.2s ease,
+        box-shadow 0.2s ease,
+        transform 0.2s ease;
+    }
+
+    .link-line:hover {
+      transform: translateY(-2px);
+      background: #27a970;
+      box-shadow: 0 8px 20px rgba(47, 186, 124, 0.3);
+    }
+
+    .link-line + .section-heading {
+      margin-top: 20px;
+    }
+
+    .link-line:focus-visible,
+    .modal-close:focus-visible {
+      outline: 3px solid var(--focus);
+      outline-offset: 3px;
+    }
+
+    .modal[hidden] {
+      display: none;
+    }
+
+    .modal {
+      position: fixed;
+      z-index: 100;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      padding: 20px;
+      background: rgba(23, 32, 51, 0.48);
+    }
+
+    .modal__dialog {
+      position: relative;
+      width: min(920px, 100%);
+      max-height: min(760px, calc(100vh - 40px));
+      overflow: auto;
+      padding: clamp(28px, 5vw, 48px);
+      border-radius: 20px;
+      background: var(--surface);
+      box-shadow: 0 20px 48px rgba(23, 32, 51, 0.28);
+    }
+
+    #ratio-info-modal .modal__dialog {
+      width: min(960px, 100%);
+      padding: clamp(32px, 5vw, 52px);
+    }
+
+    .modal__dialog h2 {
+      margin: 0 40px 20px 0;
+      font-size: 24px;
+      line-height: 1.25;
+    }
+
+    .modal__dialog p {
+      margin: 0;
+      line-height: 1.55;
+    }
+
+    .modal__dialog p + p {
+      margin-top: 16px;
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 24px;
+      right: 24px;
+      display: grid;
+      width: 38px;
+      height: 38px;
+      place-items: center;
+      border: 0;
+      border-radius: 50%;
+      color: var(--ink);
+      background: #e8edf2;
+      cursor: pointer;
+      font: 32px/1 Arial, sans-serif;
+    }
+
+    .modal-close:hover {
+      background: #dce4eb;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      min-width: 520px;
+      border-collapse: collapse;
+      background: var(--surface);
+      font-size: 16px;
+    }
+
+    th,
+    td {
+      padding: 12px 14px;
+      border: 1px solid var(--border);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      background: #e8f5ef;
+      font-weight: 700;
+    }
+
+    .table-wrap + .note {
+      margin-top: 20px;
+    }
+
+    .note {
+      padding: 20px 24px;
+      border-left: 4px solid var(--accent);
+      border-radius: 0 12px 12px 0;
+      background: var(--surface);
+      line-height: 1.55;
+    }
+
+    .note__icon {
+      display: none;
+    }
+
+    .note__text {
+      display: block;
+    }
+
+    a {
+      color: #147c54;
+      font-weight: 600;
+      text-decoration-thickness: 1px;
+      text-underline-offset: 2px;
+    }
+
+    @keyframes appear {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @media (max-width: 700px) {
+      body {
+        padding: 20px 14px;
+      }
+
+      .steps {
+        gap: 8px;
+      }
+
+      .step {
+        min-height: 96px;
+        padding: 12px;
+        font-size: 15px;
+      }
+
+      .step__number {
+        font-size: 18px;
+      }
+
+      .content h2 {
+        font-size: 22px;
+      }
+
+      .content h2.section-heading {
+        align-items: flex-start;
+        flex-wrap: wrap;
+        margin-bottom: 16px;
+        white-space: normal;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="interactive">
+    <section class="steps" aria-label="Алгоритм заполнения таблицы">
+      <button
+        class="step"
+        type="button"
+        data-step="absences"
+        aria-controls="content"
+        aria-pressed="false"
+      >
+        <span class="step__number">1.</span>
+        <span class="step__label">Внеси отсутствия</span>
+      </button>
+
+      <button
+        class="step"
+        type="button"
+        data-step="work-time"
+        aria-controls="content"
+        aria-pressed="false"
+      >
+        <span class="step__number">2.</span>
+        <span class="step__label">Распредели время на рабочие задачи</span>
+      </button>
+
+      <button
+        class="step"
+        type="button"
+        data-step="companies"
+        aria-controls="content"
+        aria-pressed="false"
+      >
+        <span class="step__number">3.</span>
+        <span class="step__label">Запланируй<br>новые компании</span>
+      </button>
+
+      <button
+        class="step"
+        type="button"
+        data-step="leads"
+        aria-controls="content"
+        aria-pressed="false"
+      >
+        <span class="step__number">4.</span>
+        <span class="step__label">Учти лиды</span>
+      </button>
+    </section>
+
+    <section class="panel" id="content" aria-live="polite">
+      <p class="placeholder" id="placeholder">
+        <em>Кликай на вкладки, чтобы узнать подробнее</em>
+      </p>
+
+      <article class="content" data-content="absences" hidden>
+        <p>
+          <strong>
+            Из общего количества рабочих дней при планировании сразу отними
+            запланированные отсутствия сотрудников, например, отпуска.
+          </strong>
+          Заполни их в столбце «Отсутствия».
+        </p>
+
+        <p>
+          Если в течение месяца сотрудник отсутствует незапланированно<br>
+          (например, находится на больничном), то изменения в рабочий календарь
+          можно внести по факту.
+        </p>
+      </article>
+
+      <article class="content" data-content="work-time" hidden>
+        <p>
+          <strong>
+            Распредели оставшееся время на выполнение рабочих задач.
+          </strong><br>
+          Внеси, сколько дней каждый сотрудник потратит на полевую работу —
+          столбец «Сверка территорий», а сколько — на производственные задачи —
+          столбец «Доп. задачи».
+        </p>
+
+        <button
+          class="link-line"
+          id="open-tasks-modal"
+          type="button"
+          aria-haspopup="dialog"
+        >
+          Посмотреть виды задач полевых специалистов
+        </button>
+
+        <h2 class="section-heading">
+          Опирайся при планировании на процентное соотношение из таблицы:
+          <button
+            class="info-button"
+            id="open-ratio-info"
+            type="button"
+            aria-haspopup="dialog"
+            aria-label="Дополнительная информация о процентном соотношении"
+          >
+            i
+          </button>
+        </h2>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Тип</th>
+                <th>Полевая работа</th>
+                <th>Производственные задачи</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Филиалы</td>
+                <td>55%</td>
+                <td>45%</td>
+              </tr>
+              <tr>
+                <td>Франчайзи</td>
+                <td>50%</td>
+                <td>50%</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <aside class="note">
+          <span class="note__text">
+            <strong>
+              Также нужно запланировать подробнее, какие именно дополнительные
+              задачи нужно выполнить и сколько времени это займёт у каждого
+              специалиста.
+            </strong>
+          </span>
+        </aside>
+
+        <p>
+          Для этого сотрудники Направления контроля составили
+          <a
+            href="https://point.2gis.ru/personal/o_yarceva/_layouts/15/guestaccess.aspx?guestaccesstoken=1Ga%2FC%2Fq%2BJDXfzbd%2BGsEGGrJH2Do%2FBqH1zSd%2BZ8jRjNU%3D&amp;docid=2_076e89f0d097c49eda0a0980f48d0e184&amp;rev=1"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            файл
+          </a>,
+          в котором удобно распределять между специалистами задачи выверки и
+          производственные задачи. Перед использованием обязательно скачай файл
+          на свой компьютер. Подробнее о заполнении файла читай
+          <a
+            href="https://wiki.2gis.ru/pages/viewpage.action?pageId=324599834"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            по ссылке
+          </a>.
+        </p>
+
+        <p>
+          А если нет доступа к файлу, обратись к своему куратору из Направления
+          контроля или на общую почту &lt;PII_1&gt;.
+        </p>
+      </article>
+
+      <article class="content" data-content="companies" hidden>
+        <p>
+          <strong>
+            План по новым компаниям выводится ЗДРК для каждого специалиста
+            индивидуально:
+          </strong>
+          рекомендуется пять новых компаний на 100 действующих, это заложено
+          в формуле в Youla. Дополнительно учитываются индивидуальные показатели
+          специалиста в
+          <a
+            href="https://pbi.2gis.one/Reports/powerbi/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            дашборде
+          </a>.
+        </p>
+
+        <p>
+          Также влияет тип территорий, куда планируется отправить специалиста.
+          Например, если сотрудник пойдёт выверять частный сектор, то план по
+          новым компаниям для него не должен быть таким же, как если бы он
+          выверял бизнес-центр. В бизнес-центре много организаций, а в частном
+          секторе — мало.
+        </p>
+      </article>
+
+      <article class="content" data-content="leads" hidden>
+        <p>
+          <strong>
+            <a
+              href="https://pbi.2gis.one/Reports/powerbi/"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Лиды
+            </a>
+            (горячие клиенты) — учитываются и оплачиваются по факту, по
+            согласованию с ДФ.
+          </strong>
+          Количество горячих клиентов планируется по предыдущему опыту работы.
+        </p>
+
+        <p>Планировать лиды не обязательно.</p>
+
+        <p>После этого переходи на вкладку «Планирование».</p>
+      </article>
+    </section>
+  </main>
+
+  <div
+    class="modal"
+    id="ratio-info-modal"
+    role="dialog"
+    aria-modal="true"
+    aria-label="Пояснение к процентному соотношению"
+    hidden
+  >
+    <section class="modal__dialog">
+      <button
+        class="modal-close"
+        id="close-ratio-info"
+        type="button"
+        aria-label="Закрыть"
+      >
+        ×
+      </button>
+
+      <p>
+        <strong>
+          Доля выверки в филиалах больше за счёт того, что часть камеральных
+          задач выполняет УК.
+        </strong>
+        Например, сверка базы может выполняться на стороне контакт-центра УК,
+        а результаты автораспознавания знаков после тотального сбора видео могут
+        вносить картографы ГОРД — группы обработки региональных данных.
+      </p>
+
+      <p>
+        <strong>
+          Кросс-функциональные задачи не входят в эту таблицу
+        </strong>,
+        потому что выполняются в процессе плановой выверки, отдельное время на
+        них не закладывается.
+      </p>
+    </section>
+  </div>
+
+  <div
+    class="modal"
+    id="tasks-modal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="tasks-modal-title"
+    hidden
+  >
+    <section class="modal__dialog">
+      <button
+        class="modal-close"
+        id="close-tasks-modal"
+        type="button"
+        aria-label="Закрыть"
+      >
+        ×
+      </button>
+
+      <h2 id="tasks-modal-title">
+        Все задачи полевых специалистов делятся на три блока:
+      </h2>
+
+      <p>
+        <strong>Полевая работа</strong> — сбор и актуализация справочной и
+        картографической информации<br>
+        на территории.
+      </p>
+
+      <p>
+        <strong>Производственные задачи</strong> — это задачи, которые не входят
+        в блок «Полевая работа».<br>
+        Они направлены на то, чтобы в готовом продукте было больше качественного
+        контента.<br>
+        Это может быть, например, обработка зацепок или ошибок
+        автораспознавания.<br>
+        Подробнее узнать, какие задачи относятся к производственным, можешь из
+        <a
+          href="https://wiki.2gis.ru/pages/viewpage.action?pageId=324599834#id-%D0%9F%D0%BB%D0%B0%D0%BD%D0%B8%D1%80%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D0%B5%D1%80%D0%B0%D0%B1%D0%BE%D1%82%D1%8B%D0%BF%D0%BE%D0%BB%D0%B5%D0%B2%D0%BE%D0%B3%D0%BE%D1%81%D0%BF%D0%B5%D1%86%D0%B8%D0%B0%D0%BB%D0%B8%D1%81%D1%82%D0%B0-%D0%9F%D1%80%D0%BE%D0%B8%D0%B7%D0%B2%D0%BE%D0%B4%D1%81%D1%82%D0%B2%D0%B5%D0%BD%D0%BD%D1%8B%D0%B5%D0%B7%D0%B0%D0%B4%D0%B0%D1%87%D0%B8:~:text=%D1%82%D0%B5%D1%80%D1%80%D0%B8%D1%82%D0%BE%D1%80%D0%B8%D0%B9%20%C2%AB%D0%92%D0%BD%D0%B5%20%D0%BF%D0%BB%D0%B0%D0%BD%D0%B0%C2%BB.-,%D0%9F%D1%80%D0%BE%D0%B8%D0%B7%D0%B2%D0%BE%D0%B4%D1%81%D1%82%D0%B2%D0%B5%D0%BD%D0%BD%D1%8B%D0%B5%20%D0%B7%D0%B0%D0%B4%D0%B0%D1%87%D0%B8,-%D0%97%D0%B0%D0%B4%D0%B0%D1%87%D0%B0%C2%A0"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          таблицы
+        </a>.
+      </p>
+
+      <p>
+        <strong>Кросс-функциональные задачи</strong> — это задачи, связанные
+        с лидами и раздачей наклеек (по согласованию с Директором филиала —
+        далее ДФ).
+      </p>
+    </section>
+  </div>
+
+  <script>
+    const steps = document.querySelectorAll('.step');
+    const contents = document.querySelectorAll('.content');
+    const placeholder = document.getElementById('placeholder');
+
+    function showStep(step) {
+      steps.forEach((button) => {
+        const active = button.dataset.step === step;
+
+        button.classList.toggle('is-active', active);
+        button.setAttribute('aria-pressed', String(active));
+      });
+
+      contents.forEach((content) => {
+        content.hidden = content.dataset.content !== step;
+      });
+
+      placeholder.hidden = true;
+    }
+
+    steps.forEach((button) => {
+      button.addEventListener('click', () => {
+        showStep(button.dataset.step);
+      });
+    });
+
+    const tasksModal = document.getElementById('tasks-modal');
+    const openTasksModal = document.getElementById('open-tasks-modal');
+    const closeTasksModal = document.getElementById('close-tasks-modal');
+
+    function openModal() {
+      tasksModal.hidden = false;
+      document.body.style.overflow = 'hidden';
+      closeTasksModal.focus();
+    }
+
+    function closeModal() {
+      tasksModal.hidden = true;
+      document.body.style.overflow = '';
+      openTasksModal.focus();
+    }
+
+    openTasksModal.addEventListener('click', openModal);
+    closeTasksModal.addEventListener('click', closeModal);
+
+    tasksModal.addEventListener('click', (event) => {
+      if (event.target === tasksModal) {
+        closeModal();
+      }
+    });
+
+    const ratioInfoModal = document.getElementById('ratio-info-modal');
+    const openRatioInfo = document.getElementById('open-ratio-info');
+    const closeRatioInfo = document.getElementById('close-ratio-info');
+
+    function openRatioInfoModal() {
+      ratioInfoModal.hidden = false;
+      document.body.style.overflow = 'hidden';
+      closeRatioInfo.focus();
+    }
+
+    function closeRatioInfoModal() {
+      ratioInfoModal.hidden = true;
+      document.body.style.overflow = '';
+      openRatioInfo.focus();
+    }
+
+    openRatioInfo.addEventListener('click', openRatioInfoModal);
+    closeRatioInfo.addEventListener('click', closeRatioInfoModal);
+
+    ratioInfoModal.addEventListener('click', (event) => {
+      if (event.target === ratioInfoModal) {
+        closeRatioInfoModal();
+      }
+    });
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key !== 'Escape') {
+        return;
+      }
+
+      if (!tasksModal.hidden) {
+        closeModal();
+      }
+
+      if (!ratioInfoModal.hidden) {
+        closeRatioInfoModal();
+      }
+    });
+  </script>
+</body>
+</html>
+
+							<script>
+                            	
+							</script>
+                        </body>
+                        </html>
+                    
